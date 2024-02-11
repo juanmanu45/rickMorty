@@ -53,7 +53,8 @@ async function crearCompaniesConLocations(){
     try{
 
         const response = await axios.get('https://rickandmortyapi.com/api/location');
-        const locations = response.data.results.filter(personaje =>(primos(personaje.id)) || personaje.id === 1);
+        const locations = response.data;
+        return locations
 
     }catch(error){
         console.error('Error al crear Companies en HubSpot',error)
@@ -61,8 +62,6 @@ async function crearCompaniesConLocations(){
 }
 
 
-crearContactsConPersonajes();
-crearCompaniesConLocations();
 
 app.get('/characters', async (req, res) => {
     try {
@@ -74,6 +73,22 @@ app.get('/characters', async (req, res) => {
         res.json(personajesPrimos);
     } catch (error) {
         res.status(500).send(error.toString());
+    }
+});
+
+app.get('/contacts',async(req,res) =>{
+    try{
+        crearContactsConPersonajes();
+    }catch(error){
+        res.status(500).send(error.toString());
+    }
+});
+
+app.get('/companies',async(req,res) =>{
+    try{
+        res
+    }catch(error){
+        console.log('Error al intentar crear Companies',error)
     }
 });
 
