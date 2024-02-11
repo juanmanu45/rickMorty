@@ -4,7 +4,8 @@
   "description": "hubspot_test",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "author": "Juan Manuel Diaz Bernal",
   "license": "ISC",
@@ -12,5 +13,8 @@
     "@hubspot/api-client": "^10.2.0",
     "axios": "^1.6.7",
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
   }
 }
