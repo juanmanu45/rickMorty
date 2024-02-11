@@ -1,0 +1,16 @@
+{
+  "name": "pueba_tecnica_hubspot",
+  "version": "1.0.0",
+  "description": "hubspot_test",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Juan Manuel Diaz Bernal",
+  "license": "ISC",
+  "dependencies": {
+    "@hubspot/api-client": "^10.2.0",
+    "axios": "^1.6.7",
+    "express": "^4.18.2"
+  }
+}
