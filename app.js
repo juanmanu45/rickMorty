@@ -52,11 +52,6 @@ async function crearContactsConPersonajes(res) {
     }
 }
 
-
-app.get('/contacts', async (req, res) => {
-    await crearContactsConPersonajes(res);
-});
-
 async function crearCompaniesConLocations(res) {
     try {
         const response = await axios.get('https://rickandmortyapi.com/api/location');
@@ -94,10 +89,95 @@ async function crearCompaniesConLocations(res) {
     }
 }
 
+async function asociarContactosConCompanias(res) {
+    try {
+
+        const { data: locationsData } = await axios.get('https://rickandmortyapi.com/api/location');
+        const { data: charactersData } = await axios.get('https://rickandmortyapi.com/api/character');
+        
+        const characters = charactersData.results.filter(character => primos(character.id) || character.id === 1);
+        const locations = locationsData.results;
+
+        const companies = [];
+        const contacts = [];
+
+        for (const location of locations) {
+            const properties = {
+                location_id: location.id,
+                name: location.name,
+                location_type: location.type,
+                dimension: location.dimension,
+                creation_date: location.created
+
+            };
+
+            const company = await hubspotClient.crm.companies.basicApi.create({ properties });
+
+            companies.push({
+                CompanyID: company.id,
+                location_id: properties.location_id,
+                name: properties.name,
+                location_type: properties.location_type,
+                dimension: properties.dimension,
+                creation_date: properties.creation_date
+            });
+
+        }
+
+        for (const character of characters) {
+            const properties = {
+                character_id: character.id,
+                firstname: character.name,
+                lastname: character.name,
+                status_character: character.status,
+                character_species: character.species,
+                character_gender: character.gender
+
+            };
+
+            const contact = await hubspotClient.crm.contacts.basicApi.create({ properties });
+
+            contacts.push({
+                ContactID: contact.id,
+                characterid: properties.character_id,
+                firstName: properties.firstname,
+                lastName: properties.lastname,
+                statusCharacter: properties.status_character,
+                characterSpecies: properties.character_species,
+                characterGender: properties.character_gender
+            });
+        }
+
+
+        
+        await hubspotClient.crm.associations.v4.basicApi.create(
+            'companies',
+            createCompanyResponse.id,
+            'contacts',
+            createContactResponse.id,
+            [
+                {
+                      "associationCategory": "HUBSPOT_DEFINED",
+                      "associationTypeId": AssociationTypes.companyToContact 
+                      // AssociationTypes contains the most popular HubSpot defined association types
+                }
+            ]
+        )
+    } catch (error) {
+        console.error('Error al asociar contactos con compañías:', error);
+    }
+}
+
+
 app.get('/companies', async (req, res) => {
     await crearCompaniesConLocations(res);
 });
 
+app.get({});
+
+app.get('/contacts', async (req, res) => {
+    await crearContactsConPersonajes(res);
+});
 
 app.get('/characters', async (req, res) => {
     try {
