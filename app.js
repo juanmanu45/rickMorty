@@ -3,7 +3,7 @@ const axios = require('axios');
 const hubspot = require('@hubspot/api-client')
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000
 
 
 const hubspotClient = new hubspot.Client({ accessToken: "pat-na1-91fcccbc-3740-4d08-9d10-e31c947d8db1" })
