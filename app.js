@@ -15,52 +15,88 @@ function primos(num) {
 }
 
 
-async function crearContactsConPersonajes() {
+async function crearContactsConPersonajes(res) {
     try {
         const response = await axios.get('https://rickandmortyapi.com/api/character');
-        const personajes = response.data.results.filter(personaje =>(primos(personaje.id)) || personaje.id === 1);
+        const personajes = response.data.results.filter(personaje => (primos(personaje.id)) || personaje.id === 1);
+        const contacts = [];
 
 
         for (const personaje of personajes) {
             const properties = {
                 character_id: personaje.id,
                 firstname: personaje.name,
-                lastname: personaje.status,
+                lastname: personaje.name,
                 status_character: personaje.status,
-                character_species:personaje.species,
-                character_gender:personaje.gender
-        
+                character_species: personaje.species,
+                character_gender: personaje.gender
+
             };
 
             const contact = await hubspotClient.crm.contacts.basicApi.create({ properties });
-            console.log(`Contacto creado con ID: ${contact.id},
-                            characterid: ${properties.character_id}, 
-                            firstName: ${properties.firstname},
-                            lastName: ${properties.lastname},
-                            statusCharacter:${properties.status_character},
-                            characterStatus:${properties.character_species},
-                            characterGender:${properties.character_gender}`
 
-            );
+            contacts.push({
+                ContactID: contact.id,
+                characterid: properties.character_id,
+                firstName: properties.firstname,
+                lastName: properties.lastname,
+                statusCharacter: properties.status_character,
+                characterSpecies: properties.character_species,
+                characterGender: properties.character_gender
+            });
         }
+        res.json(contacts);
     } catch (error) {
-        console.error('Error al crear contacts en HubSpot:', error);
+
+        res.status(500).send('Error al crear Contacts en HubSpot', error)
     }
 }
 
-async function crearCompaniesConLocations(){
 
-    try{
+app.get('/contacts', async (req, res) => {
+    await crearContactsConPersonajes(res);
+});
 
+async function crearCompaniesConLocations(res) {
+    try {
         const response = await axios.get('https://rickandmortyapi.com/api/location');
-        const locations = response.data;
-        return locations
+        const locations = response.data.results;
+        const companies = [];
 
-    }catch(error){
-        console.error('Error al crear Companies en HubSpot',error)
+        for (const location of locations) {
+            const properties = {
+                location_id: location.id,
+                name: location.name,
+                location_type: location.type,
+                dimension: location.dimension,
+                creation_date: location.created
+
+            };
+
+            const company = await hubspotClient.crm.companies.basicApi.create({ properties });
+
+            companies.push({
+                CompanyID: company.id,
+                location_id: properties.location_id,
+                name: properties.name,
+                location_type: properties.location_type,
+                dimension: properties.dimension,
+                creation_date: properties.creation_date
+            });
+
+        }
+
+        res.json(companies);
+
+    } catch (error) {
+        console.error('Error al crear Companies en HubSpot', error);
+        res.status(500).send('Error al crear Companies en HubSpot');
     }
 }
 
+app.get('/companies', async (req, res) => {
+    await crearCompaniesConLocations(res);
+});
 
 
 app.get('/characters', async (req, res) => {
@@ -76,21 +112,6 @@ app.get('/characters', async (req, res) => {
     }
 });
 
-app.get('/contacts',async(req,res) =>{
-    try{
-        crearContactsConPersonajes();
-    }catch(error){
-        res.status(500).send(error.toString());
-    }
-});
-
-app.get('/companies',async(req,res) =>{
-    try{
-        res
-    }catch(error){
-        console.log('Error al intentar crear Companies',error)
-    }
-});
 
 app.get('/location', async (req, res) => {
     try {
